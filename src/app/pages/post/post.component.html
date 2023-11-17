@@ -1,0 +1,12 @@
+<h3>Posts</h3>
+<hr />
+
+<button (click)="getPosts()">carregar posts</button>
+<ul style="display: flex; flex-direction: column; gap: 8px">
+  @for(post of posts; track post.id) {
+  <div style="display: flex; gap: 4px">
+    <p>{{ post.author }}</p>
+    <p>{{ post.title }}</p>
+  </div>
+  }
+</ul>
