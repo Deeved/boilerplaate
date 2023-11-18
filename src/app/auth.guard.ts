@@ -11,13 +11,19 @@ export const isUserLoginIn = (
   state: RouterStateSnapshot
 ) => {
   const expiration = localStorage.getItem('expires_at');
-  const expiresAt = JSON.parse(expiration || '');
-  console.log(expiresAt);
-  console.log(moment().valueOf());
-
-  if (!moment().isBefore(expiresAt)) {
-    inject(Router).navigate(['login']);
+  const router = inject(Router);
+ 
+  if(!expiration) {
+    router.navigate(['login']);
+    return false;
   }
 
-  return moment().isBefore(expiresAt);
+  const expiresAt = JSON.parse(expiration);
+
+  if (moment().isAfter(expiresAt)) {
+    router.navigate(['login']);
+    return false
+  }
+
+  return true;
 };
