@@ -1,54 +1,32 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import moment from 'moment';
-import { pipe, shareReplay, tap } from 'rxjs';
-
-interface AuthResult {
-  expiresIn: string;
-  idToken: string;
-}
+import { tap } from 'rxjs';
+import { User } from './user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private url = 'http://localhost:3000/login';
-  http = inject(HttpClient);
-
-  login(email: string, password: string) {
-    // return this.http.post<AuthResult>('/login', { email, password }).pipe(
-    //   tap((res) => this.setSession),
-    //   shareReplay()
-    // );
-    return this.http.get<AuthResult>(this.url).pipe(
-      tap((res) => this.setSession(res)),
-      shareReplay()
-    );
+  private baseUrl = 'https://api.realworld.io/api'
+  private http = inject(HttpClient);
+  
+  login(user: User) {
+    return this.http.post<{user: User}>(`${this.baseUrl}/users/login`, {user: user}).pipe(tap(this.setSession));
   }
 
-  private setSession(authResult: AuthResult) {
-    console.log('setSession', authResult);
-
-    const expiresAt = moment().add(authResult.expiresIn, 'second');
-
-    localStorage.setItem('id_token', authResult.idToken);
-    localStorage.setItem('expires_at', JSON.stringify(expiresAt.valueOf()));
+  registerUser(user: User ) {
+    return this.http.post<User>(`${this.baseUrl}/users`, {user})
   }
 
   logout() {
     localStorage.removeItem('id_token');
-    localStorage.removeItem('expires_at');
   }
 
-  public isLoggedIn() {
-    return moment().isBefore(this.getExpiration());
-  }
+  private setSession(resp: {user: User}) {
+    console.log('setSession', resp);
 
-  isLoggedOut() {
-    return !this.isLoggedIn();
-  }
-
-  getExpiration() {
-    const expiration = localStorage.getItem('expires_at');
-    const expiresAt = JSON.parse(expiration || '');
-    return moment(expiresAt);
+    if(!resp.user.token) {
+      throw new Error('erro ao obter token!')
+    } 
+    localStorage.setItem('id_token', resp.user.token);
   }
 }

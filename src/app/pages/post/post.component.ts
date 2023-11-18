@@ -17,7 +17,7 @@ export class PostComponent {
   posts: Post[] = [];
 
   ngOnInit(): void {
-    this.getPosts();
+    // this.getPosts();
   }
 
   getPosts() {

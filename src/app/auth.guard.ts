@@ -4,25 +4,17 @@ import {
   Router,
   RouterStateSnapshot,
 } from '@angular/router';
-import moment from 'moment';
 
 export const isUserLoginIn = (
   next: ActivatedRouteSnapshot,
   state: RouterStateSnapshot
 ) => {
-  const expiration = localStorage.getItem('expires_at');
   const router = inject(Router);
+  const token = localStorage.getItem('id_token');
  
-  if(!expiration) {
-    router.navigate(['login']);
+  if(!token) {
+    router.navigateByUrl('authentication/login');
     return false;
-  }
-
-  const expiresAt = JSON.parse(expiration);
-
-  if (moment().isAfter(expiresAt)) {
-    router.navigate(['login']);
-    return false
   }
 
   return true;

@@ -9,6 +9,7 @@ import {
 import { Router } from '@angular/router';
 import { AuthService } from '../../auth.service';
 import { HttpClientModule } from '@angular/common/http';
+import { User } from '../../user';
 
 @Component({
   selector: 'app-login',
@@ -26,20 +27,30 @@ export class LoginComponent {
     private authService: AuthService,
     private router: Router
   ) {
-    this.form = this.fb.group({
+    this.form = this.fb.nonNullable.group({
       email: ['', Validators.required],
       password: ['', Validators.required],
     });
   }
 
   login() {
-    const val = this.form.value;
+    const user = this.form.getRawValue()  
 
-    if (val.email && val.password) {
-      this.authService.login(val.email, val.password).subscribe(() => {
-        console.log('User is logged in');
-        this.router.navigateByUrl('/post');
-      });
-    }
+    this.authService.login(user)
+    .subscribe(
+      {
+        next: ({user}) => this.handleSuccess(user),
+        error: this.handleError
+      }
+    );
   }
+
+  handleSuccess(user: User) {
+    this.router.navigateByUrl('application/post');
+  }
+
+  handleError(error: any) {
+    console.log('Erro ao fazer login.', error);
+  }
+
 }
